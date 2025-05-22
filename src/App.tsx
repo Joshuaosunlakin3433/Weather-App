@@ -3,11 +3,31 @@ import { data } from "./API/Api";
 import { LuWind } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Greeting from "./components/Greeting";
+import TimeComponent from "./components/Time";
 
 const App = () => {
   interface WeatherInfo {
     location?: {
       name: string;
+      localtime: string;
+    };
+    current?: {
+      temp_c: number;
+      wind_mph: number;
+      humidity: number;
+    };
+    forecast?: {
+      forecastday: {
+        date: string;
+        day: {
+          maxtemp_c: number;
+          mintemp_c: number;
+          condition: {
+            text: string;
+          };
+        };
+      }[];
     };
   }
   const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>({});
@@ -27,18 +47,34 @@ const App = () => {
             const res =
               await axios.get(`http://api.weatherapi.com/v1/forecast.json?key=${
                 import.meta.env.VITE_API_KEY
-              }&q=${latitude},${longitude}&aqi=no&alerts=no
+              }&q=${latitude},${longitude}&q=&days=7&aqi=no&alerts=no
 `);
             console.log(res.data);
-            setWeatherInfo(res.data)
+            setWeatherInfo(res.data);
           } catch (error) {
             console.log("Error fetching weather data", error);
           }
         }
       };
-      fetchData()
+      fetchData();
     });
   }, []);
+
+  // function to format date from API to a more readable format
+  const formatDate = (date: string | undefined) =>
+    date ? date.slice(0, 10).split("-").reverse().join(".") : "";
+  //function to convert date string to weekday
+  const toWeekDays = (dateString: string | undefined) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    console.log(date);
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+    console.log(dayName);
+    return dayName;
+  };
+
+//function to render greetings based on user browsers time
+
 
   return (
     <div className="font-primary">
@@ -47,52 +83,71 @@ const App = () => {
         {/* major section starts */}
         <div className="bg-white shadow-2xs w-3/4 p-5">
           <nav className="flex justify-between">
-            <p className="text-black/80 font-semibold">{weatherInfo.location?.name}</p>
-            <p className="font-semibold">21.04.2021</p>
+            <p className="text-black/80 font-semibold">
+              {weatherInfo.location?.name}
+            </p>
+            <p className="font-semibold">
+              {formatDate(weatherInfo.location?.localtime)}
+            </p>
           </nav>
           {/* big texts start */}
 
           <div className="flex flex-col items-center gap-9">
             <div>
               <div className="flex text-primary items-center gap-3">
-                <span className="text-[14rem]">20°</span>
+                <div className="flex flex-col items-center">
+                  <span className="text-[14rem]">
+                    {weatherInfo.current?.temp_c}°
+                  </span>
+                  <p className="text-primary text-2xl font-semibold -mt-10 ml-10">
+                    {weatherInfo.forecast?.forecastday[0].day.condition.text}
+                  </p>
+                </div>
+
                 <span className="-ml-7 mt-13">
                   <div className="flex gap-3 items-center">
                     <LuWind />
-                    <p className="text-primary font-medium">6.1 mph</p>
+                    <p className="text-primary font-medium text-lg">
+                      {weatherInfo.current?.wind_mph} mph
+                    </p>
                   </div>
                   <div className="flex gap-3 items-center">
                     <ImDroplet className="text-white" />
-                    <p className="text-primary font-medium">90%</p>
+                    <p className="text-primary font-medium text-lg">
+                      {weatherInfo.current?.humidity}%
+                    </p>
                   </div>
                 </span>
               </div>
-              <p className="text-primary text-2xl font-semibold">Cloudy</p>
             </div>
-
+            {/* //major section cards forcast begins */}
             <div className="grid grid-cols-7 gap-2 mt-15">
-              {data.map((item) => (
-                <div className="flex flex-col gap-2 border-1 border-primary shadow-sm p-3 rounded-xl">
+              {weatherInfo.forecast?.forecastday.map((item) => (
+                <div
+                  key={item.date}
+                  className="flex flex-col items-center gap-2 border-1 border-primary shadow-sm p-3 rounded-xl"
+                >
                   <p className="text-black/90 font-medium text-sm">
-                    {item.day}
+                    {toWeekDays(item.date)}
                   </p>
                   <p className="text-primary font-medium">
-                    {item.mainTemperature}°
+                    {item.day.maxtemp_c}°
                   </p>
-                  <p className="text-primary font-medium text-base">
-                    {item.mainWeather}
+                  <p className="text-primary font-medium text-base text-center">
+                    {item.day.condition.text}
                   </p>
                 </div>
               ))}
             </div>
+            {/* major section card forcast ends            */}
           </div>
         </div>
         {/* major section ends */}
         {/* //minor section starts here */}
-        <div className="bg-white/30 p-2 flex flex-col gap-8 font-semibold text-black/80 text-xl w-1/4">
+        <div className="bg-white/30 border-l-1 pt-4 lg:h-[100vh] border-primary p-2 flex flex-col gap-8 font-semibold text-black/80 text-xl w-1/4">
           <div className="flex flex-col items-center gap-4">
-            <h2>Good Morning</h2>
-            <h2>12.27 PM</h2>
+            <Greeting className="lg:text-3xl"/>
+            <TimeComponent className="text-2xl"/>
           </div>
           {/* minor second section starts */}
           <div className="flex flex-col items-center gap-3">
