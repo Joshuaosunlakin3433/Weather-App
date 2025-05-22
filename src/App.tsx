@@ -1,10 +1,10 @@
-import { ImDroplet } from "react-icons/im";
 import { data } from "./API/Api";
 import { LuWind } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Greeting from "./components/Greeting";
 import TimeComponent from "./components/Time";
+import { BsDroplet } from "react-icons/bs";
 
 const App = () => {
   interface WeatherInfo {
@@ -16,6 +16,10 @@ const App = () => {
       temp_c: number;
       wind_mph: number;
       humidity: number;
+      feelslike_c: number;
+      condition: {
+        text: string;
+      };
     };
     forecast?: {
       forecastday: {
@@ -73,8 +77,7 @@ const App = () => {
     return dayName;
   };
 
-//function to render greetings based on user browsers time
-
+  //function to render greetings based on user browsers time
 
   return (
     <div className="font-primary">
@@ -100,19 +103,20 @@ const App = () => {
                     {weatherInfo.current?.temp_c}°
                   </span>
                   <p className="text-primary text-2xl font-semibold -mt-10 ml-10">
-                    {weatherInfo.forecast?.forecastday[0].day.condition.text}
+                    {weatherInfo.current?.condition.text}
                   </p>
                 </div>
 
                 <span className="-ml-7 mt-13">
                   <div className="flex gap-3 items-center">
-                    <LuWind />
+                    <LuWind className="text-xl"/>
                     <p className="text-primary font-medium text-lg">
                       {weatherInfo.current?.wind_mph} mph
                     </p>
                   </div>
                   <div className="flex gap-3 items-center">
-                    <ImDroplet className="text-white" />
+                    <BsDroplet className="text-xl"/>
+
                     <p className="text-primary font-medium text-lg">
                       {weatherInfo.current?.humidity}%
                     </p>
@@ -146,34 +150,42 @@ const App = () => {
         {/* //minor section starts here */}
         <div className="bg-white/30 border-l-1 pt-4 lg:h-[100vh] border-primary p-2 flex flex-col gap-8 font-semibold text-black/80 text-xl w-1/4">
           <div className="flex flex-col items-center gap-4">
-            <Greeting className="lg:text-3xl"/>
-            <TimeComponent className="text-2xl"/>
+            <Greeting className="lg:text-3xl" />
+            <TimeComponent className="text-2xl" />
           </div>
           {/* minor second section starts */}
           <div className="flex flex-col items-center gap-3">
-            <div className="flex text-primary items-center gap-3">
-              <span className="text-4xl">20°</span>
-              <span>
+            <div className="flex text-primary items-center gap-4">
+              <span className="text-6xl">{weatherInfo.current?.temp_c}°</span>
+              <span className="flex flex-col gap-2">
                 <div className="flex gap-2 items-center">
-                  <LuWind />
-                  <p className="text-black font-medium">6.1 mph</p>
+                  <LuWind className="text-lg"/>
+                  <p className="text-black font-bold text-sm">
+                    {weatherInfo.current?.wind_mph} mph
+                  </p>
                 </div>
                 <div className="flex gap-2 items-center">
-                  <ImDroplet className="text-white" />
-                  <p className="text-black font-medium">90%</p>
+                  <BsDroplet className="text-lg"/>
+                  <p className="text-black font-bold text-sm">
+                    {weatherInfo.current?.humidity}%
+                  </p>
                 </div>
               </span>
             </div>
             <div className="flex flex-col gap-2 items-center">
-              <p className="text-primary font-medium text-sm">Feels like 19°</p>
-              <p className="text-primary font-semibold">Cloudy</p>
+              <p className="text-primary font-semibold text-sm">
+                Feels like {weatherInfo.current?.feelslike_c}°
+              </p>
+              <p className="text-primary font-bold">
+                {weatherInfo.current?.condition.text}
+              </p>
             </div>
           </div>
           {/* minor second section ends */}
           {/* Hourly Forcast cards minor section begins */}
           <div>
-            <h4 className="text-center font-semibold mb-4">Hourly Forcast</h4>
-            <div className="grid grid-cols-3 gap-2 mt-10">
+            <h4 className="text-center font-medium">Hourly Forcast</h4>
+            <div className="grid grid-cols-3 gap-2 mt-6">
               {data.slice(0, 6).map((item) => (
                 <div className="flex flex-col gap-2 border-1 border-primary shadow-sm p-3 rounded-xl items-center">
                   <p className="text-black/90 font-medium text-sm">
