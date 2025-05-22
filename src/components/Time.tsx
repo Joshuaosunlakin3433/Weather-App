@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-
-const TimeComponent = () => {
+interface TimeProps {
+  className?: string;
+}
+const TimeComponent = ({className}:TimeProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -22,7 +24,7 @@ const TimeComponent = () => {
 
   return (
     <div>
-      <h2>{formatTime(currentTime)}</h2>
+      <h2 className= {className}>{formatTime(currentTime)}</h2>
     </div>
   );
 };
