@@ -43,7 +43,12 @@ function useWeatherData() {
         console.log("Geolocation error:", error);
         setError(error);
         setLoading(false);
-      }
+      },
+      {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 15000,
+    }
     );
   }, []);
 
