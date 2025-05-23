@@ -1,211 +1,136 @@
-import { data } from "./API/Api";
-import { LuWind } from "react-icons/lu";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Greeting from "./components/Greeting";
-import TimeComponent from "./components/Time";
+import { useState, useEffect, useCallback } from "react";
+import useWeatherData from "./components/useWeatherData";
+import type { WeatherInfo } from "./components/WeatherInterface";
+import DailyCards from "./components/DailyCards";
+import HourlySidebar from "./components/HourlyCards";
+import { MinorSectionHeader } from "./components/MinorSectionHeader";
+import MinorSectionBody from "./components/MinorSectionBody";
 import { BsDroplet } from "react-icons/bs";
+import { LuWind } from "react-icons/lu";
+import Footer from "./components/Footer";
 
-const App = () => {
-  interface WeatherInfo {
-    location?: {
-      name: string;
-      localtime: string;
-    };
-    current?: {
-      temp_c: number;
-      wind_mph: number;
-      humidity: number;
-      feelslike_c: number;
-      condition: {
-        text: string;
-      };
-    };
-    forecast?: {
-      forecastday: {
-        date: string;
-        day: {
-          maxtemp_c: number;
-          mintemp_c: number;
-          condition: {
-            text: string;
-          };
-        };
-      }[];
-    };
+const App = ()=> {
+  const [selectedDay, setSelectedDay] = useState(0);
+
+  interface HourlyData {
+    time: string;
+    temp_c: number;
+    condition: { text: string };
+    date: string;
   }
-  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo>({});
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const { latitude, longitude } = position.coords;
-      setLatitude(latitude);
-      setLongitude(longitude);
-      console.log(longitude, latitude);
+  const [hourlyData, setHourlyData] = useState<HourlyData[]>([]);
 
-      const fetchData = async () => {
-        if (latitude && longitude) {
-          try {
-            const res =
-              await axios.get(`http://api.weatherapi.com/v1/forecast.json?key=${
-                import.meta.env.VITE_API_KEY
-              }&q=${latitude},${longitude}&q=&days=7&aqi=no&alerts=no
-`);
-            console.log(res.data);
-            setWeatherInfo(res.data);
-          } catch (error) {
-            console.log("Error fetching weather data", error);
-          }
-        }
-      };
-      fetchData();
-    });
-  }, []);
-
-  // function to format date from API to a more readable format
-  const formatDate = (date: string | undefined) =>
-    date ? date.slice(0, 10).split("-").reverse().join(".") : "";
-  //function to convert date string to weekday
-  const toWeekDays = (dateString: string | undefined) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    console.log(date);
-    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-    console.log(dayName);
-    return dayName;
+  const { weatherInfo, loading, error } = useWeatherData() as {
+    weatherInfo: WeatherInfo | null;
+    loading: boolean;
+    error: unknown;
   };
 
-  //function to render greetings based on user browsers time
+  // Function to get 6 hours of data starting from current hour
+  const getHourlyData = useCallback(
+    (dayIndex: number) => {
+      if (!weatherInfo || !weatherInfo.forecast) return [];
+
+      const currentHour = new Date().getHours();
+      const selectedDayData = weatherInfo.forecast.forecastday[dayIndex];
+
+      const startHour = dayIndex === 0 ? currentHour : 0;
+
+      const sixHours = [];
+      for (let i = 0; i < 6; i++) {
+        const hourIndex = startHour + i;
+
+        if (hourIndex < 24) {
+          const hourData = selectedDayData.hour[hourIndex];
+          sixHours.push({
+            ...hourData,
+            date: selectedDayData.date,
+          });
+        }
+      }
+      return sixHours;
+    },
+    [weatherInfo]
+  );
+
+  useEffect(() => {
+    if (weatherInfo) {
+      const newHourlyData = getHourlyData(selectedDay);
+      setHourlyData(newHourlyData);
+    }
+  }, [selectedDay, weatherInfo, getHourlyData]);
+
+  const handleDayClick = (dayIndex: number) => {
+    setSelectedDay(dayIndex);
+  };
+  // Function to format date to dd.mm.yyyy format
+  const formatDate = (date: string | undefined) =>
+    date ? date.slice(0, 10).split("-").reverse().join(".") : "";
+
+  if (loading) return <div>Loading weather...</div>;
+  if (error) return <div>Error loading weather data</div>;
+  if (!weatherInfo) return <div>No weather data available</div>;
+  if (!weatherInfo || !weatherInfo.forecast) return null;
 
   return (
-    <div className="font-primary">
-      {/* this div wraps the entire page so as to flex the two sections */}
-      <div className="flex justify-between">
-        {/* major section starts */}
-        <div className="bg-white shadow-2xs w-3/4 p-5">
-          <nav className="flex justify-between">
-            <p className="text-black/80 font-semibold">
-              {weatherInfo.location?.name}
+    <div>
+       <div className="weather-app font-primary flex flex-col lg:flex-row justify-between min-h-screen">
+      <div className="bg-white shadow-2xs w-full lg:w-3/4 p-3 lg:p-5">
+      <nav className="flex justify-between px-2 lg:px-0 mb-5 sticky top-0 bg-white z-10 py-3">
+        <p className="text-black/80 font-semibold text-sm lg:text-base lg:ml-15">
+        {weatherInfo.location?.name}
+        </p>
+        <p className="font-semibold text-sm lg:text-base lg:mr-15">
+        {formatDate(weatherInfo.location?.localtime)}
+        </p>
+      </nav>
+      <div className="flex flex-col items-center gap-6 lg:gap-9">
+        <div >
+        <div className="flex text-primary items-center gap-2 lg:gap-3 ">
+          <div className="flex flex-col gap-3 items-center">
+          <span className="text-[3.5rem] sm:text-[8rem] lg:text-[13rem]">
+            {weatherInfo.current?.temp_c}°
+          </span>
+          <p className="text-primary text-base sm:text-xl lg:text-3xl font-semibold -mt-2 lg:-mt-10 lg:ml-10">
+            {weatherInfo.current?.condition.text}
+          </p>
+          </div>
+
+          <span className="-ml-5 lg:-ml-7 mt-6 lg:mt-13 flex flex-col gap-1.5  ">
+          <div className="flex gap-2 lg:gap-3 items-center">
+            <LuWind className="text-sm md:text-base lg:text-xl" />
+            <p className="text-primary font-medium text-sm lg:text-lg">
+            {weatherInfo.current?.wind_mph} mph
             </p>
-            <p className="font-semibold">
-              {formatDate(weatherInfo.location?.localtime)}
+          </div>
+          <div className="flex gap-2 lg:gap-3 items-center">
+            <BsDroplet className="text-sm md:text-base lg:text-xl" />
+            <p className="text-primary font-medium text-sm lg:text-lg">
+            {weatherInfo.current?.humidity}%
             </p>
-          </nav>
-          {/* big texts start */}
-
-          <div className="flex flex-col items-center gap-9">
-            <div>
-              <div className="flex text-primary items-center gap-3">
-                <div className="flex flex-col items-center">
-                  <span className="text-[14rem]">
-                    {weatherInfo.current?.temp_c}°
-                  </span>
-                  <p className="text-primary text-2xl font-semibold -mt-10 ml-10">
-                    {weatherInfo.current?.condition.text}
-                  </p>
-                </div>
-
-                <span className="-ml-7 mt-13">
-                  <div className="flex gap-3 items-center">
-                    <LuWind className="text-xl"/>
-                    <p className="text-primary font-medium text-lg">
-                      {weatherInfo.current?.wind_mph} mph
-                    </p>
-                  </div>
-                  <div className="flex gap-3 items-center">
-                    <BsDroplet className="text-xl"/>
-
-                    <p className="text-primary font-medium text-lg">
-                      {weatherInfo.current?.humidity}%
-                    </p>
-                  </div>
-                </span>
-              </div>
-            </div>
-            {/* //major section cards forcast begins */}
-            <div className="grid grid-cols-7 gap-2 mt-15">
-              {weatherInfo.forecast?.forecastday.map((item) => (
-                <div
-                  key={item.date}
-                  className="flex flex-col items-center gap-2 border-1 border-primary shadow-sm p-3 rounded-xl"
-                >
-                  <p className="text-black/90 font-medium text-sm">
-                    {toWeekDays(item.date)}
-                  </p>
-                  <p className="text-primary font-medium">
-                    {item.day.maxtemp_c}°
-                  </p>
-                  <p className="text-primary font-medium text-base text-center">
-                    {item.day.condition.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-            {/* major section card forcast ends            */}
           </div>
+          </span>
         </div>
-        {/* major section ends */}
-        {/* //minor section starts here */}
-        <div className="bg-white/30 border-l-1 pt-4 lg:h-[100vh] border-primary p-2 flex flex-col gap-8 font-semibold text-black/80 text-xl w-1/4">
-          <div className="flex flex-col items-center gap-4">
-            <Greeting className="lg:text-3xl" />
-            <TimeComponent className="text-2xl" />
-          </div>
-          {/* minor second section starts */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex text-primary items-center gap-4">
-              <span className="text-6xl">{weatherInfo.current?.temp_c}°</span>
-              <span className="flex flex-col gap-2">
-                <div className="flex gap-2 items-center">
-                  <LuWind className="text-lg"/>
-                  <p className="text-black font-bold text-sm">
-                    {weatherInfo.current?.wind_mph} mph
-                  </p>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <BsDroplet className="text-lg"/>
-                  <p className="text-black font-bold text-sm">
-                    {weatherInfo.current?.humidity}%
-                  </p>
-                </div>
-              </span>
-            </div>
-            <div className="flex flex-col gap-2 items-center">
-              <p className="text-primary font-semibold text-sm">
-                Feels like {weatherInfo.current?.feelslike_c}°
-              </p>
-              <p className="text-primary font-bold">
-                {weatherInfo.current?.condition.text}
-              </p>
-            </div>
-          </div>
-          {/* minor second section ends */}
-          {/* Hourly Forcast cards minor section begins */}
-          <div>
-            <h4 className="text-center font-medium">Hourly Forcast</h4>
-            <div className="grid grid-cols-3 gap-2 mt-6">
-              {data.slice(0, 6).map((item) => (
-                <div className="flex flex-col gap-2 border-1 border-primary shadow-sm p-3 rounded-xl items-center">
-                  <p className="text-black/90 font-medium text-sm">
-                    {item.day}
-                  </p>
-                  <p className="text-primary font-medium">
-                    {item.mainTemperature}°
-                  </p>
-                  <p className="text-primary font-medium text-base">
-                    {item.mainWeather}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Hourly Forcast cards minor section ends */}
         </div>
+        <DailyCards
+        weatherInfo={weatherInfo}
+        selectedDay={selectedDay}
+        onDayClick={handleDayClick}
+        />
       </div>
+      
+      </div>
+      <div className="bg-white/30 border-t-1 lg:border-l-1 lg:border-t-0 border-primary p-2 flex flex-col gap-8 lg:gap-15 font-semibold text-black/80 text-lg lg:text-xl w-full lg:w-1/4">
+      <MinorSectionHeader />
+      <MinorSectionBody />
+      <HourlySidebar hourlyData={hourlyData} />
+      </div>
+      
     </div>
+      <Footer />
+    </div>
+   
   );
-};
-
+}
 export default App;
