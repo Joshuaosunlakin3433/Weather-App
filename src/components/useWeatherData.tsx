@@ -8,7 +8,7 @@ function useWeatherData() {
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown | null>(null);
-
+  const apiKey = import.meta.env.VITE_API_KEY;
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -22,9 +22,7 @@ function useWeatherData() {
             try {
               setLoading(true);
               const res = await axios.get(
-                `http://api.weatherapi.com/v1/forecast.json?key=${
-                  import.meta.env.VITE_API_KEY
-                }&q=${latitude},${longitude}&q=&days=7&aqi=no&alerts=no`
+                `http://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${latitude},${longitude}&q=&days=7&aqi=no&alerts=no`
               );
               console.log(res.data);
               setWeatherInfo(res.data);
@@ -45,10 +43,10 @@ function useWeatherData() {
         setLoading(false);
       },
       {
-      enableHighAccuracy: true,
-      maximumAge: 0,
-      timeout: 15000,
-    }
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000,
+      }
     );
   }, []);
 
