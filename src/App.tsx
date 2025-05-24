@@ -11,6 +11,8 @@ import Footer from "./components/Footer";
 
 const App = () => {
   const [selectedDay, setSelectedDay] = useState(0);
+  const [showCityInput, setShowCityInput] = useState(false);
+  const [cityInput, setCityInput] = useState("");
 
   interface HourlyData {
     time: string;
@@ -21,11 +23,20 @@ const App = () => {
 
   const [hourlyData, setHourlyData] = useState<HourlyData[]>([]);
 
-  const { weatherInfo, loading, error, debugInfo } = useWeatherData() as {
+  const {
+    weatherInfo,
+    loading,
+    error,
+    // debugInfo,
+    locationMethod,
+    fetchWeatherByCity,
+  } = useWeatherData() as {
     weatherInfo: WeatherInfo | null;
     loading: boolean;
     error: unknown;
     debugInfo: string;
+    locationMethod: "gps" | "manual" | "default";
+    fetchWeatherByCity: (city: string) => void;
   };
 
   // Function to get 6 hours of data starting from current hour
@@ -65,81 +76,148 @@ const App = () => {
   const handleDayClick = (dayIndex: number) => {
     setSelectedDay(dayIndex);
   };
+
+  const handleCitySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (cityInput.trim()) {
+      fetchWeatherByCity(cityInput.trim());
+      setShowCityInput(false);
+      setCityInput("");
+    }
+  };
+
   // Function to format date to dd.mm.yyyy format
   const formatDate = (date: string | undefined) =>
     date ? date.slice(0, 10).split("-").reverse().join(".") : "";
 
   if (loading)
     return (
-      <div>
-        Loading weather...
-        <div
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="text-lg mb-4 animate-ping text-center">Loading weather...</div>
+        {/* <div
           style={{
             fontSize: "14px",
             color: "#666",
             padding: "10px",
             background: "#f5f5f5",
-            margin: "10px 0",
+            borderRadius: "8px",
+            maxWidth: "400px",
+            textAlign: "center",
           }}
         >
           🐛 Debug: {debugInfo}
-        </div>
+        </div> */}
       </div>
     );
 
   if (error)
     return (
-      <div>
-        Error loading weather data
-        <div
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        {/* <div className="text-lg mb-4">Error loading weather data</div> */}
+        {/* <div
           style={{
             fontSize: "14px",
             color: "#d00",
             padding: "10px",
             background: "#fee",
-            margin: "10px 0",
+            borderRadius: "8px",
+            maxWidth: "400px",
+            textAlign: "center",
+            marginBottom: "20px",
           }}
         >
           🐛 Debug: {debugInfo}
-        </div>
+        </div> */}
+        <button
+          onClick={() => setShowCityInput(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Enter City Manually
+        </button>
       </div>
     );
+
   if (!weatherInfo) return <div>No weather data available</div>;
   if (!weatherInfo || !weatherInfo.forecast) return null;
 
   return (
     <div>
+      {/* City Input Modal */}
+      {showCityInput && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-lg font-semibold mb-4">Enter Your City</h3>
+            <form onSubmit={handleCitySubmit}>
+              <input
+                type="text"
+                value={cityInput}
+                onChange={(e) => setCityInput(e.target.value)}
+                placeholder="Enter city name..."
+                className="border border-gray-300 rounded px-3 py-2 w-full mb-4"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Get Weather
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCityInput(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="weather-app font-primary flex flex-col lg:flex-row justify-between min-h-screen">
         <div className="bg-white shadow-2xs w-full lg:w-3/4 p-3 lg:p-5">
           <nav className="flex justify-between px-2 lg:px-0 mb-5 sticky top-0 bg-white z-10 py-3">
-            <p className="text-black/80 font-semibold text-sm lg:text-base lg:ml-15">
-              {weatherInfo.location?.name}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-black/80 font-semibold text-sm lg:text-base lg:ml-15">
+                {weatherInfo.location?.name}
+              </p>
+              {locationMethod === "default" && (
+                <button
+                  onClick={() => setShowCityInput(true)}
+                  className="text-blue-500 text-xs underline"
+                >
+                  Change Location
+                </button>
+              )}
+            </div>
             <p className="font-semibold text-sm lg:text-base lg:mr-15">
               {formatDate(weatherInfo.location?.localtime)}
             </p>
           </nav>
+
           <div className="flex flex-col items-center gap-6 lg:gap-9">
             <div>
-              <div className="flex text-primary items-center gap-2 lg:gap-3 ">
-                <div className="flex flex-col gap-3 items-center">
+              <div className="relative flex text-primary items-center gap-2 lg:gap-3 w-[19.3rem] sm:w-[25rem] lg:w-[37rem]">
+                <div className="flex flex-col gap-3 items-center bg-red ">
                   <span className="text-[3.5rem] sm:text-[8rem] lg:text-[13rem]">
                     {weatherInfo.current?.temp_c}°
                   </span>
-                  <p className="text-primary text-base sm:text-xl lg:text-3xl font-semibold -mt-2 lg:-mt-10 lg:ml-10">
+                  <p className="text-primary text-center sm:text-xl lg:text-3xl font-semibold mt-4 sm:mt-0">
                     {weatherInfo.current?.condition.text}
                   </p>
                 </div>
 
-                <span className="-ml-5 lg:-ml-7 mt-6 lg:mt-13 flex flex-col gap-1.5  ">
+                <span className="absolute right-5 top-11 sm:top-26 sm:right-1.5 lg:top-42 lg:right-0 flex flex-col gap-1.5">
                   <div className="flex gap-2 lg:gap-3 items-center">
-                    <LuWind className="text-sm md:text-base lg:text-xl" />
+                    <LuWind className="text-sm sm:text-lg lg:text-xl" />
                     <p className="text-primary font-medium text-sm lg:text-lg">
                       {weatherInfo.current?.wind_mph} mph
                     </p>
                   </div>
                   <div className="flex gap-2 lg:gap-3 items-center">
-                    <BsDroplet className="text-sm md:text-base lg:text-xl" />
+                    <BsDroplet className="text-sm sm:text-lg lg:text-xl" />
                     <p className="text-primary font-medium text-sm lg:text-lg">
                       {weatherInfo.current?.humidity}%
                     </p>
@@ -154,26 +232,17 @@ const App = () => {
             />
           </div>
         </div>
+
         <div className="bg-white/30 border-t-1 lg:border-l-1 lg:border-t-0 border-primary p-2 flex flex-col gap-8 lg:gap-15 font-semibold text-black/80 text-lg lg:text-xl w-full lg:w-1/4">
           <MinorSectionHeader />
           <MinorSectionBody />
           <HourlySidebar hourlyData={hourlyData} />
         </div>
       </div>
-      <Footer />
 
-      {/* Temporary debug info - remove after fixing */}
-      <div
-        style={{
-          fontSize: "12px",
-          color: "#666",
-          padding: "10px",
-          background: "#f9f9f9",
-        }}
-      >
-        ✅ Debug: {debugInfo}
-      </div>
+      <Footer />
     </div>
   );
 };
+
 export default App;
