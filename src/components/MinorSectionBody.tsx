@@ -1,18 +1,18 @@
 import { LuWind } from "react-icons/lu";
-import useWeatherData from "./useWeatherData";
 import { BsDroplet } from "react-icons/bs";
 import type { WeatherInfo } from "./WeatherInterface";
 
-const MinorSectionBody = () => {
-  const { weatherInfo, loading, error } = useWeatherData() as {
-    weatherInfo: WeatherInfo | null;
-    loading: boolean;
-    error: unknown;
-  };
+interface MinorSectionBodyProps {
+  weatherInfo: WeatherInfo | null;
+  loading: boolean;
+  error: unknown;
+}
 
+const MinorSectionBody = ({ weatherInfo, loading, error }: MinorSectionBodyProps) => {
   if (loading) return <div>Loading weather...</div>;
   if (error) return <div>Error loading weather data</div>;
   if (!weatherInfo) return <div>No weather data available</div>;
+
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="flex text-primary items-center gap-2 md:gap-3 lg:gap-4">

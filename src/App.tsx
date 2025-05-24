@@ -146,27 +146,27 @@ const App = () => {
       {showCityInput && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">Enter Your City</h3>
+            <h3 className="text-lg font-semibold mb-4 text-black/70">Enter Your City</h3>
             <form onSubmit={handleCitySubmit}>
               <input
                 type="text"
                 value={cityInput}
                 onChange={(e) => setCityInput(e.target.value)}
                 placeholder="Enter city name..."
-                className="border border-gray-300 rounded px-3 py-2 w-full mb-4"
+                className="border border-gray-300 rounded px-3 py-2 w-full mb-4 outline-none focus:border-gray-200"
                 autoFocus
               />
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  className="bg-linear-to-r from-gray-200 to-gray-400 hover:from-gray-400 hover:to-gray-200 text-white px-4 py-2 rounded"
                 >
                   Get Weather
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCityInput(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                  className="bg-white text-black/70 px-4 py-2 rounded hover:bg-gray-400 hover:text-white"
                 >
                   Cancel
                 </button>
@@ -186,7 +186,7 @@ const App = () => {
               {locationMethod === "default" && (
                 <button
                   onClick={() => setShowCityInput(true)}
-                  className="text-blue-500 text-xs underline"
+                  className="bg-linear-to-r from-gray-200 to-gray-400 hover:from-gray-400 hover:to-gray-200 shadow-2xs pt-1.5 px-3 text-black/80 text-xs transition-all duration-300"
                 >
                   Change Location
                 </button>
@@ -235,7 +235,7 @@ const App = () => {
 
         <div className="bg-white/30 border-t-1 lg:border-l-1 lg:border-t-0 border-primary p-2 flex flex-col gap-8 lg:gap-15 font-semibold text-black/80 text-lg lg:text-xl w-full lg:w-1/4">
           <MinorSectionHeader />
-          <MinorSectionBody />
+          <MinorSectionBody weatherInfo={weatherInfo} loading={loading} error={error}/>
           <HourlySidebar hourlyData={hourlyData} />
         </div>
       </div>

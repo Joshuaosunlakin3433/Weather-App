@@ -20,7 +20,7 @@ function useWeatherData() {
       setDebugInfo('Making API request with coordinates...');
       
       const axiosConfig = {
-        timeout: 15000,
+        timeout: 5000,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -84,7 +84,7 @@ function useWeatherData() {
       setDebugInfo(`Fetching weather for city: ${city}`);
       
       const axiosConfig = {
-        timeout: 15000,
+        timeout: 5000,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
