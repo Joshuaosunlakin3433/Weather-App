@@ -159,14 +159,14 @@ const App = () => {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="bg-linear-to-r from-gray-200 to-gray-400 hover:from-gray-400 hover:to-gray-200 text-white px-4 py-2 rounded"
+                  className="bg-linear-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-300 text-white px-4 py-2 rounded"
                 >
                   Get Weather
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCityInput(false)}
-                  className="bg-white text-black/70 px-4 py-2 rounded hover:bg-gray-400 hover:text-white"
+                  className="bg-white border-1 border-gray-300 text-black/70 px-4 py-2 rounded hover:bg-gray-400 hover:text-white"
                 >
                   Cancel
                 </button>
@@ -186,7 +186,7 @@ const App = () => {
               {locationMethod === "default" && (
                 <button
                   onClick={() => setShowCityInput(true)}
-                  className="bg-linear-to-r from-gray-200 to-gray-400 hover:from-gray-400 hover:to-gray-200 shadow-2xs pt-1.5 px-3 text-black/80 text-xs transition-all duration-300"
+                  className="bg-linear-to-r from-gray-300 to-gray-400 hover:from-gray-400 hover:to-gray-300 shadow-2xs py-1.5 px-3 rounded-md text-black/80 text-xs transition-all duration-300"
                 >
                   Change Location
                 </button>

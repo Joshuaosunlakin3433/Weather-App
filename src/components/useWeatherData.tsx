@@ -206,7 +206,7 @@ function useWeatherData() {
       {
         enableHighAccuracy: false,
         maximumAge: 300000,
-        timeout: 30000,
+        timeout: 5000,
       }
     );
   }, [fetchWeatherByCoordinates, fetchDefaultWeather, apiKey]);
