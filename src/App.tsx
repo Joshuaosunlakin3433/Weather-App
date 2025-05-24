@@ -144,7 +144,7 @@ const App = () => {
     <div>
       {/* City Input Modal */}
       {showCityInput && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-linear-to-br from-gray-300 to-gray-400 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h3 className="text-lg font-semibold mb-4 text-black/70">Enter Your City</h3>
             <form onSubmit={handleCitySubmit}>
