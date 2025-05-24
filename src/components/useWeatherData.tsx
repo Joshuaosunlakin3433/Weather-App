@@ -22,7 +22,7 @@ function useWeatherData() {
             try {
               setLoading(true);
               const res = await axios.get(
-                `http://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${latitude},${longitude}&q=&days=7&aqi=no&alerts=no`
+                `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${latitude},${longitude}&q=&days=7&aqi=no&alerts=no`
               );
               console.log(res.data);
               setWeatherInfo(res.data);
