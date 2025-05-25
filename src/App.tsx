@@ -199,12 +199,12 @@ const App = () => {
 
           <div className="flex flex-col items-center gap-6 lg:gap-9">
             <div>
-              <div className="relative flex text-primary items-center gap-2 lg:gap-3 w-[19.3rem] sm:w-[25rem] lg:w-[37rem]">
+              <div className="relative flex text-primary items-center justify-center gap-2 lg:gap-3 w-[19.3rem] sm:w-[25rem] lg:w-[37rem]">
                 <div className="flex flex-col gap-3 items-center bg-red ">
                   <span className="text-[3.5rem] sm:text-[8rem] lg:text-[13rem]">
                     {weatherInfo.current?.temp_c}°
                   </span>
-                  <p className="text-primary text-center sm:text-xl lg:text-3xl font-semibold mt-4 sm:mt-0">
+                  <p className="text-primary text-center sm:text-xl lg:text-3xl font-semibold mt- sm:mt-0">
                     {weatherInfo.current?.condition.text}
                   </p>
                 </div>
